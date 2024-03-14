@@ -24,6 +24,12 @@ const (
 	Avail    DAType = "avail"
 )
 
+type ExplorerType string
+
+const (
+	Blockscout ExplorerType = "blockscout"
+)
+
 var SupportedDas = []DAType{Celestia, Avail, Local}
 
 type RollappConfig struct {
