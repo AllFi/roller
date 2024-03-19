@@ -100,7 +100,7 @@ func (b *Blockscout) cloneRepo() error {
 	err := utils.ExecBashCmd(cmd)
 	if err != nil {
 		if strings.Contains(stderr.String(), "already exists") {
-			fmt.Printf("Blockscout repository already exists at %s. Skipping...\n", b.home)
+			fmt.Printf("Blockscout repository already exists at %s.\n", b.home)
 			return nil
 		}
 		return err

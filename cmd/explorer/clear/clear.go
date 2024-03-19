@@ -10,7 +10,7 @@ import (
 func Cmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "clear",
-		Short: "Commands for clearing the block explorer data.",
+		Short: "Clears the block explorer data.",
 		Run: func(cmd *cobra.Command, args []string) {
 			home := cmd.Flag(utils.FlagNames.Home).Value.String()
 			explorer := explorer.NewExplorer(config.Blockscout, home)

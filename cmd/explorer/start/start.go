@@ -10,7 +10,7 @@ import (
 func Cmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "start",
-		Short: "Commands for running the block explorer.",
+		Short: "Starts the block explorer.",
 		Example: "roller explorer start --home /path/to/home -f \"NEXT_PUBLIC_NETWORK_NAME=Awesome rollapp\" " +
 			"-f \"NEXT_PUBLIC_NETWORK_CURRENCY_SYMBOL=TKN\"",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -26,7 +26,7 @@ func Cmd() *cobra.Command {
 			utils.PrettifyErrorIfExists(err)
 		},
 	}
-	cmd.PersistentFlags().StringArrayP("backend-envs", "b", []string{}, "The environment variables for the backend service.")
-	cmd.PersistentFlags().StringArrayP("frontend-envs", "f", []string{}, "The environment variables for the frontend service.")
+	cmd.PersistentFlags().StringArrayP("backend-env", "b", []string{}, "Set environment variables for the backend service.")
+	cmd.PersistentFlags().StringArrayP("frontend-env", "f", []string{}, "Set environment variables for the frontend service.")
 	return cmd
 }

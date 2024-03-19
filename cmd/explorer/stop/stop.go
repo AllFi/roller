@@ -10,7 +10,7 @@ import (
 func Cmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "stop",
-		Short: "Commands for stopping the block explorer.",
+		Short: "Stops the block explorer.",
 		Run: func(cmd *cobra.Command, args []string) {
 			home := cmd.Flag(utils.FlagNames.Home).Value.String()
 			explorer := explorer.NewExplorer(config.Blockscout, home)
