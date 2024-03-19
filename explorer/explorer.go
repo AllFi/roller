@@ -6,7 +6,7 @@ import (
 )
 
 type BlockExplorer interface {
-	Start() error
+	Start(backendEnvs []string, frontendEnvs []string) error
 	Stop() error
 	Clear() error
 }

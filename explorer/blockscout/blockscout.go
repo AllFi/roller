@@ -30,13 +30,23 @@ func New(home string) *Blockscout {
 	}
 }
 
-func (b *Blockscout) Start() error {
-	err := b.cloneRepo()
+func (b *Blockscout) Start(backendParams []string, frontendParams []string) error {
+	backendEnvs, err := parseEnvs(backendParams)
 	if err != nil {
 		return err
 	}
 
-	err = b.configure()
+	frontendEnvs, err := parseEnvs(frontendParams)
+	if err != nil {
+		return err
+	}
+
+	err = b.cloneRepo()
+	if err != nil {
+		return err
+	}
+
+	err = b.configure(backendEnvs, frontendEnvs)
 	if err != nil {
 		return err
 	}
@@ -98,33 +108,41 @@ func (b *Blockscout) cloneRepo() error {
 	return nil
 }
 
-func (b *Blockscout) configure() error {
+func (b *Blockscout) configure(backendEnvs map[string]string, frontendEnvs map[string]string) error {
+	backendDefaultEnvs, frontendDefaultEnvs := b.envsFromRollerConfig()
+
+	backendDotEnvPath := filepath.Join(b.home, BackendDotEnvRelativePath)
+	backendEnvs = mergeMaps(backendDefaultEnvs, backendEnvs)
+	err := patchDotEnv(backendDotEnvPath, backendEnvs)
+	if err != nil {
+		return err
+	}
+
+	frontendDotEnvPath := filepath.Join(b.home, FrontendDotEnvRelativePath)
+	frontendEnvs = mergeMaps(frontendDefaultEnvs, frontendEnvs)
+	return patchDotEnv(frontendDotEnvPath, frontendEnvs)
+}
+
+func (b *Blockscout) envsFromRollerConfig() (map[string]string, map[string]string) {
 	rollappConfig, err := config.LoadConfigFromTOML(filepath.Dir(b.home))
 	if err != nil {
-		return err
+		return nil, nil
 	}
 
-	backendPath := filepath.Join(b.home, BackendDotEnvRelativePath)
-
-	env := make(map[string]string)
-	env["NETWORK"] = rollappConfig.RollappID
-	env["SUBNETWORK"] = rollappConfig.RollappID
-	env["COIN"] = rollappConfig.Denom
-
-	err = b.patchDotEnv(backendPath, env)
-	if err != nil {
-		return err
+	backendEnv := map[string]string{
+		"NETWORK":    rollappConfig.RollappID,
+		"SUBNETWORK": rollappConfig.RollappID,
+		"COIN":       rollappConfig.Denom,
 	}
 
-	frontendPath := filepath.Join(b.home, FrontendDotEnvRelativePath)
+	frontendEnv := map[string]string{
+		"NEXT_PUBLIC_NETWORK_NAME":            rollappConfig.RollappID,
+		"NEXT_PUBLIC_NETWORK_SHORT_NAME":      rollappConfig.RollappID,
+		"NEXT_PUBLIC_NETWORK_CURRENCY_NAME":   rollappConfig.Denom,
+		"NEXT_PUBLIC_NETWORK_CURRENCY_SYMBOL": rollappConfig.Denom,
+	}
 
-	env = make(map[string]string)
-	env["NEXT_PUBLIC_NETWORK_NAME"] = rollappConfig.RollappID
-	env["NEXT_PUBLIC_NETWORK_SHORT_NAME"] = rollappConfig.RollappID
-	env["NEXT_PUBLIC_NETWORK_CURRENCY_NAME"] = rollappConfig.Denom
-	env["NEXT_PUBLIC_NETWORK_CURRENCY_SYMBOL"] = rollappConfig.Denom
-
-	return b.patchDotEnv(frontendPath, env)
+	return backendEnv, frontendEnv
 }
 
 func (b *Blockscout) dockerComposeCommand(commandArgs ...string) *exec.Cmd {
